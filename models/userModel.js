@@ -1,24 +1,62 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
+// Declare the Schema of the Mongo model
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
-});
+    name:{
+        type:String,
+        required:true,
+        index:true,
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true,
+    },
+    password:{
+        type:String,
+        required:true,
+    },
+    role: {
+        type:String,
+        default:"user",
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false,
+    },
+    cart: {
+        type: Array,
+        default: []
+    },
+    address: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Address"
+    }],
+    wishlist:  [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Address"
+    }],
+    refreshToken: {
+        type: String,
+    },
+}, { timestamps: true });
 
-// Add a pre-save hook to hash the password before saving to the database
+// Pre-save middleware to hash the password
 userSchema.pre('save', async function(next) {
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
 
-const User = mongoose.model('User', userSchema);
+// Method to compare passwords
+userSchema.methods.isPasswordMatched = async function(enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password);
+};
 
-module.exports = User;
+// Export the model
+module.exports = mongoose.model('User', userSchema);

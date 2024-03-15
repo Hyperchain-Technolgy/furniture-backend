@@ -1,55 +1,23 @@
-// index.js
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-
+const dbConnect = require('./config/dbconnect');
 const app = express();
-const PORT = process.env.PORT || 5000;
+const dotenv = require('dotenv').config();
+const PORT = process.env.PORT || 4000;
+const authRouter = require('./routes/authRoute');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const { notFound, errorHandler } = require('./middlewares/errorHandler');
 
+dbConnect();
+
+app.use(cookieParser()); // Parse cookies before handling routes
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/api/user", authRouter);
 
-// Connect to MongoDB
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  // Removed unsupported options
-  // useCreateIndex: true,  // Not required in Mongoose 6+
-  // useFindAndModify: false // Not required in Mongoose 6+
-});
+app.use(notFound);
+app.use(errorHandler);
 
-// Import routes
-const userRoutes = require('./routes/userRoutes');
-const productRoutes = require('./routes/productRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-
-// Use routes
-app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-
-// Verify JWT middleware
-app.use('/api', (req, res, next) => {
-  const token = req.header('Authorization');
-
-  // Check if token exists
-  if (!token) {
-    return res.status(401).json({ error: 'Access denied. No token provided.' });
-  }
-
-  try {
-    // Verify token
-    const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token.' });
-  }
-});
-
-// Start server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running at PORT ${PORT}`);
 });
