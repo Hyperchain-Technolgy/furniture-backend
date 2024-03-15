@@ -1,4 +1,5 @@
-const mongoose = require("mongoose"); // Erase if already required
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', true);
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 // Declare the Schema of the Mongo model

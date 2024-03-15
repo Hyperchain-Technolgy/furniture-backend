@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', true);
 const validateMongoDbId = (id) => {
   // Check if the provided ID is a valid MongoDB ObjectID
   const isValid = mongoose.Types.ObjectId.isValid(id);

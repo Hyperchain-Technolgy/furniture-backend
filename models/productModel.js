@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', true);
 
 // Declare the Schema of the Mongo model
 var furnitureSchema = new mongoose.Schema(
