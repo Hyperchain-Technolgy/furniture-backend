@@ -1,32 +1,37 @@
-const express = require('express');
-const dbConnect = require('./config/dbconnect'); // Import database connection function
+const bodyParser = require("body-parser");
+const express = require("express");
+const dbConnect = require("./config/dbConnect");
+const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const app = express();
-const dotenv = require('dotenv').config(); // Load environment variables
-const PORT = process.env.PORT || 4000; // Define port number
-const authRouter = require('./routes/authRoute'); // Import authentication router
-const bodyParser = require('body-parser'); // Parse request bodies
-const cookieParser = require('cookie-parser'); // Parse cookies
-const { notFound, errorHandler } = require('./middlewares/errorHandler'); // Import error handling middleware
+const dotenv = require("dotenv").config();
+const PORT = 5000;
+const authRouter = require("./routes/authRoute");
+const productRouter = require("./routes/productRoute");
+const categoryRouter = require("./routes/prodcategoryRoute");
+const colorRouter = require("./routes/colorRoute");
+const enqRouter = require("./routes/enqRoute");
+const couponRouter = require("./routes/couponRoute");
+const uploadRouter = require("./routes/uploadRoute");
+const cookieParser = require("cookie-parser");
+const morgan = require("morgan");
+const cors = require("cors");
 
-// Connect to the database
 dbConnect();
-
-// Middleware to parse cookies
-app.use(cookieParser());
-// Middleware to parse JSON bodies
+app.use(morgan("dev"));
+app.use(cors());
 app.use(bodyParser.json());
-// Middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// Route handling for authentication endpoints
+app.use(cookieParser());
 app.use("/api/user", authRouter);
+app.use("/api/product", productRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/coupon", couponRouter);
+app.use("/api/color", colorRouter);
+app.use("/api/enquiry", enqRouter);
+app.use("/api/upload", uploadRouter);
 
-// Middleware for handling 404 Not Found errors
 app.use(notFound);
-// Middleware for handling other errors
 app.use(errorHandler);
-
-// Start the server
 app.listen(PORT, () => {
-    console.log(`Server is running at PORT ${PORT}`);
+  console.log(`Server is running at PORT ${PORT}`);
 });
