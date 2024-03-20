@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 mongoose.set('strictQuery', true);
 
 // Declare the Schema of the Mongo model
-var furnitureSchema = new mongoose.Schema(
+var productSchema  = new mongoose.Schema(
  {
   title: {
    type: String,
@@ -71,4 +71,4 @@ var furnitureSchema = new mongoose.Schema(
 );
 
 //Export the model
-module.exports = mongoose.model("Furniture", furnitureSchema);
+module.exports = mongoose.model("Product", productSchema);
