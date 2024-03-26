@@ -133,6 +133,32 @@ const addToWishlist = asyncHandler(async (req, res) => {
   }
 });
 
+const removeFromWishlist = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { prodId } = req.body;
+  try {
+    const user = await User.findById(_id);
+    const alreadyAdded = user.wishlist.find((id) => id.toString() === prodId);
+    if (alreadyAdded) {
+      let user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $pull: { wishlist: prodId },
+        },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } else {
+      res.status(400).json({ message: "Product not found in wishlist" });
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+
 const rating = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { star, prodId, comment } = req.body;
@@ -197,4 +223,5 @@ module.exports = {
   deleteProduct,
   addToWishlist,
   rating,
+  removeFromWishlist
 };
