@@ -62,6 +62,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       fullname: findUser?.fullname,
       email: findUser?.email,
       token: generateToken(findUser?._id),
+      role: findUser?.role,
     });
   } else {
     throw new Error("Invalid Credentials");
@@ -93,6 +94,7 @@ const loginAdmin = asyncHandler(async (req, res) => {
       fullname: findAdmin?.fullname,
       email: findAdmin?.email,
       token: generateToken(findAdmin?._id),
+      role: findAdmin?.role,
     });
   } else {
     throw new Error("Invalid Credentials");
