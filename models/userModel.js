@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
-mongoose.set('strictQuery', true);
+const mongoose = require("mongoose");
+mongoose.set("strictQuery", true);
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema(
   {
@@ -27,8 +28,23 @@ var userSchema = new mongoose.Schema(
       default: false,
     },
     cart: {
-      type: Array,
-      default: [],
+      products: [
+        {
+          product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+          },
+          count: Number,
+          color: String,
+          price: Number,
+        },
+      ],
+      cartTotal: Number,
+      totalAfterDiscount: Number,
+      orderby: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     },
     address: {
       type: String,
