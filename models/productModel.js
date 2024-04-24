@@ -28,8 +28,7 @@ var productSchema = new mongoose.Schema(
       required: true,
     },
     images: [{
-      url: String,
-      alt: String
+      url: String
     }],
     color: {
       type: [String],
