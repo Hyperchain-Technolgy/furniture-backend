@@ -30,7 +30,8 @@ var productSchema = new mongoose.Schema(
     images: [{
       id: {
         type: mongoose.Schema.Types.ObjectId,
-        default: mongoose.Types.ObjectId
+        default: mongoose.Types.ObjectId,
+        required: true
       },
       url: String
     }],
