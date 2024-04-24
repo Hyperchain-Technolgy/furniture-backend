@@ -50,14 +50,15 @@ var productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    stock: {
+    quantity: {
       type: Number,
       required: true,
     },
-    dimensions: {
-      width: Number,
-      height: Number,
-      depth: Number
+    stock: {
+      type: Boolean,
+      default: function () {
+        return this.quantity > 0;
+      }
     }
   },
   { timestamps: true }
