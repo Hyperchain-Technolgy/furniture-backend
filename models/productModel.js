@@ -27,11 +27,12 @@ var productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    images: {
-      url: String
-    },
+    images: [{
+      url: String,
+      alt: String
+    }],
     color: {
-      type: Array,
+      type: [String],
       required: true
     },
     material: {
@@ -46,9 +47,18 @@ var productSchema = new mongoose.Schema(
       },
     ],
     totalrating: {
-      type: String,
+      type: Number,
       default: 0,
     },
+    stock: {
+      type: Number,
+      required: true,
+    },
+    dimensions: {
+      width: Number,
+      height: Number,
+      depth: Number
+    }
   },
   { timestamps: true }
 );
