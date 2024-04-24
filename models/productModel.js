@@ -28,6 +28,10 @@ var productSchema = new mongoose.Schema(
       required: true,
     },
     images: [{
+      id: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: mongoose.Types.ObjectId
+      },
       url: String
     }],
     color: {
