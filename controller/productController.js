@@ -6,10 +6,34 @@ const validateMongoDbId = require("../utils/validateMongoDbId");
 
 const createProduct = asyncHandler(async (req, res) => {
   try {
-    if (req.body.title) {
-      req.body.slug = slugify(req.body.title);
+    if (!req.body.title || !req.body.description || !req.body.price || !req.body.category || !req.body.color || !req.body.material || !req.body.quantity) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Incomplete product information.'
+      });
     }
-    const newProduct = await Product.create(req.body);
+
+    const images = [];
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        images.push({ url: file.path });
+      });
+    }
+
+    const newProductData = {
+      title: req.body.title,
+      slug: slugify(req.body.title),
+      description: req.body.description,
+      price: req.body.price,
+      category: req.body.category,
+      images: images,
+      color: req.body.color,
+      material: req.body.material,
+      quantity: req.body.quantity,
+      stock: req.body.quantity > 0
+    };
+
+    const newProduct = await Product.create(newProductData);
     res.json(newProduct);
   } catch (error) {
     throw new Error(error);
@@ -23,7 +47,21 @@ const updateProduct = asyncHandler(async (req, res) => {
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
-    const updateProduct = await Product.findOneAndUpdate({ id }, req.body, {
+
+    // Process updated images
+    const images = [];
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        images.push({ url: file.path }); // Assuming `path` is the field where multer saves the file
+      });
+    }
+
+    const updatedProductData = {
+      ...req.body,
+      images: images // Attach updated images here
+    };
+
+    const updateProduct = await Product.findOneAndUpdate({ id }, updatedProductData, {
       new: true,
     });
     res.json(updateProduct);
