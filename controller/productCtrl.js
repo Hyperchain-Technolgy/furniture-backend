@@ -33,13 +33,17 @@ const updateProduct = asyncHandler(async (req, res) => {
 });
 
 const deleteProduct = asyncHandler(async (req, res) => {
-  const id = req.params;
+  const id = req.params.id;
   validateMongoDbId(id);
+
   try {
-    const deleteProduct = await Product.findOneAndDelete(id);
-    res.json(deleteProduct);
+    const deletedProduct = await Product.findOneAndDelete({ _id: id });
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json({ message: "Product deleted successfully" });
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ message: "Error deleting product", error: error.message });
   }
 });
 
