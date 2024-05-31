@@ -27,8 +27,6 @@ var userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-<<<<<<< HEAD
-=======
     cart: {
       products: [
         {
@@ -48,7 +46,6 @@ var userSchema = new mongoose.Schema(
         ref: "User",
       },
     },
->>>>>>> ff617936ddc58abb9daf0d8c38983e87c27ec84f
     address: {
       type: String,
     },
