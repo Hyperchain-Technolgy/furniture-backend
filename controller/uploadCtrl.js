@@ -8,13 +8,14 @@ const uploadImages = asyncHandler(async (req, res) => {
     const files = req.files;
     for (const file of files) {
       const { path } = file;
-      urls.push({ url: path });
+      urls.push(path); // Save path as string
     }
     res.json(urls);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 const deleteImages = asyncHandler(async (req, res) => {
   const { id } = req.params;

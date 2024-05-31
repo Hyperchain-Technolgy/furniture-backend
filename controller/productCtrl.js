@@ -10,8 +10,14 @@ const createProduct = asyncHandler(async (req, res) => {
       req.body.slug = slugify(req.body.title);
     }
 
+    // Ensure images are correctly formatted
     if (req.body.images) {
-      req.body.images = req.body.images.map((image) => ({ url: image }));
+      req.body.images = req.body.images.map((image) => {
+        if (typeof image === 'string') {
+          return { url: image };
+        }
+        return image;
+      });
     }
 
     const newProduct = await Product.create(req.body);
@@ -20,6 +26,7 @@ const createProduct = asyncHandler(async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -35,8 +42,14 @@ const updateProduct = asyncHandler(async (req, res) => {
       req.body.slug = newSlug;
     }
 
+    // Ensure images are correctly formatted
     if (req.body.images) {
-      req.body.images = req.body.images.map((image) => ({ url: image }));
+      req.body.images = req.body.images.map((image) => {
+        if (typeof image === 'string') {
+          return { url: image };
+        }
+        return image;
+      });
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
@@ -47,6 +60,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 const deleteProduct = asyncHandler(async (req, res) => {
   const id = req.params.id;
