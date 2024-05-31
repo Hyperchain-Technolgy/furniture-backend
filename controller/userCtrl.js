@@ -1,6 +1,5 @@
 const User = require("../models/userModel");
 const Product = require("../models/productModel");
-const Cart = require("../models/cartModel");
 const Coupon = require("../models/couponModel");
 const Order = require("../models/orderModel");
 const uniqid = require("uniqid");
@@ -62,6 +61,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       fullname: findUser?.fullname,
       email: findUser?.email,
       token: generateToken(findUser?._id),
+      role: findUser.role
     });
   } else {
     throw new Error("Invalid Credentials");
@@ -338,11 +338,14 @@ const userCart = asyncHandler(async (req, res) => {
   try {
     let products = [];
     const user = await User.findById(_id);
-    // check if user already have product in cart
-    const alreadyExistCart = await Cart.findOne({ orderby: user._id });
-    if (alreadyExistCart) {
-      alreadyExistCart.remove();
-    }
+    // Clear existing cart
+    user.cart = {
+      products: [],
+      cartTotal: 0,
+      totalAfterDiscount: 0,
+    };
+    await user.save();
+
     for (let i = 0; i < cart.length; i++) {
       let object = {};
       object.product = cart[i]._id;
@@ -356,25 +359,24 @@ const userCart = asyncHandler(async (req, res) => {
     for (let i = 0; i < products.length; i++) {
       cartTotal = cartTotal + products[i].price * products[i].count;
     }
-    let newCart = await new Cart({
-      products,
-      cartTotal,
-      orderby: user?._id,
-    }).save();
-    res.json(newCart);
+
+    user.cart.products = products;
+    user.cart.cartTotal = cartTotal;
+    await user.save();
+
+    res.json(user.cart);
   } catch (error) {
     throw new Error(error);
   }
 });
 
+
 const getUserCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   validateMongoDbId(_id);
   try {
-    const cart = await Cart.findOne({ orderby: _id }).populate(
-      "products.product"
-    );
-    res.json(cart);
+    const userWithCart = await User.findById(_id).populate("cart.products.product");
+    res.json(userWithCart.cart);
   } catch (error) {
     throw new Error(error);
   }
@@ -384,9 +386,12 @@ const emptyCart = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   validateMongoDbId(_id);
   try {
-    const user = await User.findOne({ _id });
-    const cart = await Cart.findOneAndRemove({ orderby: user._id });
-    res.json(cart);
+    const updatedUser = await User.findByIdAndUpdate(_id, {
+      'cart.products': [],
+      'cart.cartTotal': 0,
+      'cart.totalAfterDiscount': 0
+    }, { new: true });
+    res.json(updatedUser.cart);
   } catch (error) {
     throw new Error(error);
   }

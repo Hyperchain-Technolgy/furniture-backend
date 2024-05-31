@@ -1,74 +1,74 @@
 const mongoose = require('mongoose');
-mongoose.set('strictQuery', true);
+const validator = require('validator');
 
-// Declare the Schema of the Mongo model
-var productSchema  = new mongoose.Schema(
- {
+const productSchema = new mongoose.Schema({
   title: {
-   type: String,
-   required: true,
-   trim: true,
+    type: String,
+    required: [true, 'Product title is required'],
+    trim: true,
+    maxlength: [100, 'Title cannot exceed 100 characters']
   },
   slug: {
-   type: String,
-   required: true,
-   unique: true,
-   lowercase: true,
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    set: value => value.replace(/\s+/g, '-').toLowerCase()
   },
   description: {
-   type: String,
-   required: true,
+    type: String,
+    required: true,
+    // maxlength: [500, 'Description cannot exceed 500 characters']
   },
   price: {
-   type: Number,
-   required: true,
+    type: Number,
+    required: true,
+    min: [0, 'Price must be a positive number']
   },
   category: {
-   type: String,
-   required: true,
+    type: String,
+    required: true
   },
-  brand: {
-   type: String,
-   default: "Your Brand Name", // replace with your brand name
+  images: [{
+    url: {
+      type: String,
+      validate: [validator.isURL, 'Please use a valid URL']
+    }
+  }],
+  color: {
+    type: [String],
+    // required: true
   },
-  quantity: {
-   type: Number,
-   required: true,
-  },
-  sold: {
-   type: Number,
-   default: 0,
-  },
-  images: [
-   {
-    public_id: String,
-    url: String,
-   },
-  ],
-  color: [],
-  material: { // new field for furniture material
-   type: String,
-   required: true,
-  },
-  dimensions: { // new field for furniture dimensions
-   height: Number,
-   width: Number,
-   depth: Number,
+  material: {
+    type: String,
+    // required: true
   },
   ratings: [
-   {
-    star: Number,
-    comment: String,
-    postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-   },
+    {
+      star: {
+        type: Number,
+        min: 1,
+        max: 5
+      },
+      comment: String,
+      postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+    }
   ],
   totalrating: {
-   type: String,
-   default: 0,
+    type: Number,
+    default: 0
   },
- },
- { timestamps: true }
-);
+  quantity: {
+    type: Number,
+    required: true,
+    min: [0, 'Quantity cannot be negative']
+  },
+  stock: {
+    type: Boolean,
+    default: function () {
+      return this.quantity > 0;
+    }
+  }
+}, { timestamps: true });
 
-//Export the model
 module.exports = mongoose.model("Product", productSchema);

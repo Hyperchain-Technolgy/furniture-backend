@@ -9,37 +9,72 @@ const createProduct = asyncHandler(async (req, res) => {
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
+
+    // Ensure images are correctly formatted
+    if (req.body.images) {
+      req.body.images = req.body.images.map((image) => {
+        if (typeof image === 'string') {
+          return { url: image };
+        }
+        return image;
+      });
+    }
+
     const newProduct = await Product.create(req.body);
     res.json(newProduct);
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ message: error.message });
   }
 });
+
+
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const id = req.params;
+  const { id } = req.params;
   validateMongoDbId(id);
+
   try {
     if (req.body.title) {
-      req.body.slug = slugify(req.body.title);
+      const newSlug = slugify(req.body.title);
+      const existingProduct = await Product.findOne({ slug: newSlug });
+      if (existingProduct && existingProduct._id.toString() !== id) {
+        return res.status(400).json({ message: "Slug already exists" });
+      }
+      req.body.slug = newSlug;
     }
-    const updateProduct = await Product.findOneAndUpdate({ id }, req.body, {
+
+    // Ensure images are correctly formatted
+    if (req.body.images) {
+      req.body.images = req.body.images.map((image) => {
+        if (typeof image === 'string') {
+          return { url: image };
+        }
+        return image;
+      });
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
       new: true,
     });
-    res.json(updateProduct);
+    res.json(updatedProduct);
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
+
 const deleteProduct = asyncHandler(async (req, res) => {
-  const id = req.params;
+  const id = req.params.id;
   validateMongoDbId(id);
+
   try {
-    const deleteProduct = await Product.findOneAndDelete(id);
-    res.json(deleteProduct);
+    const deletedProduct = await Product.findOneAndDelete({ _id: id });
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.json({ message: "Product deleted successfully" });
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ message: "Error deleting product", error: error.message });
   }
 });
 
