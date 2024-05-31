@@ -17,18 +17,25 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const id = req.params;
+  const { id } = req.params; 
   validateMongoDbId(id);
+
   try {
     if (req.body.title) {
-      req.body.slug = slugify(req.body.title);
+      const newSlug = slugify(req.body.title);
+      const existingProduct = await Product.findOne({ slug: newSlug });
+      if (existingProduct && existingProduct._id.toString() !== id) {
+        return res.status(400).json({ message: "Slug already exists" });
+      }
+      req.body.slug = newSlug;
     }
-    const updateProduct = await Product.findOneAndUpdate({ id }, req.body, {
+
+    const updateProduct = await Product.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     res.json(updateProduct);
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
