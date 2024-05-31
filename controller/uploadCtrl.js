@@ -4,13 +4,11 @@ const Product = require("../models/productModel");
 
 const uploadImages = asyncHandler(async (req, res) => {
   try {
-    const urls = [];
-    const files = req.files;
-    for (const file of files) {
-      const { path } = file;
-      urls.push(path); // Save path as string
+    if (req.body.images) {
+      res.json(req.body.images);
+    } else {
+      res.status(400).json({ message: "No images provided" });
     }
-    res.json(urls);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
