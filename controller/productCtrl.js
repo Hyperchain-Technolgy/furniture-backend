@@ -9,15 +9,20 @@ const createProduct = asyncHandler(async (req, res) => {
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
+
+    if (req.body.images) {
+      req.body.images = req.body.images.map((image) => ({ url: image }));
+    }
+
     const newProduct = await Product.create(req.body);
     res.json(newProduct);
   } catch (error) {
-    throw new Error(error);
+    res.status(500).json({ message: error.message });
   }
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   validateMongoDbId(id);
 
   try {
@@ -30,10 +35,14 @@ const updateProduct = asyncHandler(async (req, res) => {
       req.body.slug = newSlug;
     }
 
-    const updateProduct = await Product.findByIdAndUpdate(id, req.body, {
+    if (req.body.images) {
+      req.body.images = req.body.images.map((image) => ({ url: image }));
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
       new: true,
     });
-    res.json(updateProduct);
+    res.json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
