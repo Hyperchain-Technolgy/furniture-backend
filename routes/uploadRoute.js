@@ -5,14 +5,14 @@ const { uploadPhoto, productImgResize } = require("../middlewares/uploadImage");
 const router = express.Router();
 
 router.post(
-  "/",
+  "/", // This is the endpoint path
   authMiddleware,
   isAdmin,
-  uploadPhoto.array("images", 10),
-  productImgResize,
-  uploadImages
+  uploadPhoto.array("images", 10), // This middleware handles file uploads
+  productImgResize, // This middleware resizes uploaded images
+  uploadImages // This is the handler function for uploading images
 );
 
-router.delete("/delete-img/:id", authMiddleware, isAdmin, deleteImages);
+router.delete("/delete-img/:id", authMiddleware, isAdmin, deleteImages); // This is the handler function for deleting images
 
 module.exports = router;
