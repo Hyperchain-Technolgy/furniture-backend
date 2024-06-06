@@ -61,7 +61,6 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
       fullname: findUser?.fullname,
       email: findUser?.email,
       token: generateToken(findUser?._id),
-      role: findUser.role
     });
   } else {
     throw new Error("Invalid Credentials");

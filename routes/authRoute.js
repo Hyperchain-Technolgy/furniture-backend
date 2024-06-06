@@ -48,7 +48,7 @@ router.get("/wishlist", authMiddleware, getWishlist);
 router.get("/cart", authMiddleware, getUserCart);
 
 router.get("/:id", authMiddleware, getaUser);
-router.delete("/empty-cart", authMiddleware, emptyCart);
+router.delete("/cart", authMiddleware, emptyCart);
 router.delete("/:id", deleteaUser);
 router.put(
   "/order/update-order/:id",

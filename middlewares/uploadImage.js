@@ -5,11 +5,15 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../public/images/"));
+    const dir = path.join(__dirname, "../public/images/products/");
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
   },
   filename: function (req, file, cb) {
-    const uniquesuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniquesuffix + ".jpeg");
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ".jpeg");
   },
 });
 
@@ -28,27 +32,18 @@ const uploadPhoto = multer({
 });
 
 const productImgResize = async (req, res, next) => {
-  if (!req.files || req.files.length === 0) return next();
-  req.body.images = [];
-
+  if (!req.files) return next();
   await Promise.all(
     req.files.map(async (file) => {
-      const resizedPath = path.join('public/images/products/', file.filename);
-
+      const newPath = `public/images/products/${file.filename}`;
       await sharp(file.path)
         .resize(300, 300)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(resizedPath);
-
-      // Add resized image path to req.body.images
-      req.body.images.push({ url: resizedPath.replace('public/', '') });
-
-      // Remove original file
-      fs.unlinkSync(file.path);
+        .toFile(newPath);
+      fs.unlinkSync(file.path);  // Delete the original file
     })
   );
-
   next();
 };
 

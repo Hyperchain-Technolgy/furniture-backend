@@ -3,9 +3,17 @@ const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 const validateMongoDbId = require("../utils/validateMongoDbId");
+const upload = require("../middlewares/uploadImage");
 
 const createProduct = asyncHandler(async (req, res) => {
   try {
+    if (!req.body.title || !req.body.description || !req.body.price || !req.body.category || !req.body.quantity) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Incomplete product information.'
+      });
+    }
+
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
@@ -20,14 +28,17 @@ const createProduct = asyncHandler(async (req, res) => {
       });
     }
 
+    // Handle image uploads and store filenames in req.body
+    if (req.files) {
+      req.body.images = req.files.map((file) => ({ url: file.path }));
+    }
+
     const newProduct = await Product.create(req.body);
-    res.json(newProduct);
+    res.status(201).json(newProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
-
 
 const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -61,7 +72,6 @@ const updateProduct = asyncHandler(async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 const deleteProduct = asyncHandler(async (req, res) => {
   const id = req.params.id;
