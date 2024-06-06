@@ -3,10 +3,17 @@ const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 const validateMongoDbId = require("../utils/validateMongoDbId");
-const upload = require("../middlewares/uploadImage"); // Import the upload middleware
+const upload = require("../middlewares/uploadImage");
 
 const createProduct = asyncHandler(async (req, res) => {
   try {
+    if (!req.body.title || !req.body.description || !req.body.price || !req.body.category || !req.body.quantity) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Incomplete product information.'
+      });
+    }
+
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
     }
@@ -23,7 +30,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
     // Handle image uploads and store filenames in req.body
     if (req.files) {
-      req.body.images = req.files.map((file) => file.filename);
+      req.body.images = req.files.map((file) => ({ url: file.path }));
     }
 
     const newProduct = await Product.create(req.body);
