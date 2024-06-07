@@ -18,16 +18,6 @@ const createProduct = asyncHandler(async (req, res) => {
       req.body.slug = slugify(req.body.title);
     }
 
-    // Ensure images are correctly formatted
-    if (req.body.images) {
-      req.body.images = req.body.images.map((image) => {
-        if (typeof image === 'string') {
-          return { url: image };
-        }
-        return image;
-      });
-    }
-
     // Handle image uploads and store filenames in req.body
     if (req.files) {
       req.body.images = req.files.map((file) => ({ url: file.path }));
@@ -54,7 +44,6 @@ const updateProduct = asyncHandler(async (req, res) => {
       req.body.slug = newSlug;
     }
 
-    // Ensure images are correctly formatted
     if (req.body.images) {
       req.body.images = req.body.images.map((image) => {
         if (typeof image === 'string') {

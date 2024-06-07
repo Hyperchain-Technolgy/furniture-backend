@@ -9,7 +9,7 @@ router.post(
   authMiddleware,
   isAdmin,
   uploadPhoto.array("images", 10), // This middleware handles file uploads
-  productImgResize, // This middleware resizes uploaded images
+  // This middleware resizes uploaded images
   uploadImages // This is the handler function for uploading images
 );
 
