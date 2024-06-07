@@ -30,11 +30,12 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   images: [{
-    url: {
-      type: String,
-      validate: [validator.isURL, 'Please use a valid URL'],
-      images: [{ type: String }]
-    }
+    image: String,
+    // url: {
+    //   type: String,
+    //   validate: [validator.isURL, 'Please use a valid URL'],
+    //   images: [{ type: String }]
+    // }
   }],
   color: {
     type: [String],

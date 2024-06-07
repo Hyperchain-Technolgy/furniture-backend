@@ -20,7 +20,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
     // Handle image uploads and store filenames in req.body
     if (req.files) {
-      req.body.images = req.files.map((file) => ({ url: file.path }));
+      req.body.images = req.files.map((file) => ({ image: file.filename }));
     }
 
     const newProduct = await Product.create(req.body);
@@ -51,6 +51,10 @@ const updateProduct = asyncHandler(async (req, res) => {
         }
         return image;
       });
+    }
+
+    if (req.files && req.files.length > 0) {
+      req.body.images = req.files.map((file) => ({ image: file.filename }));
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {

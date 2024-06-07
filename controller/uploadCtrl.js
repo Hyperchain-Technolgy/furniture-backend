@@ -3,17 +3,14 @@ const asyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
 
 const uploadImages = asyncHandler(async (req, res) => {
+  const imageName = req.file.filename;
   try {
-    if (req.body.images) {
-      res.json(req.body.images);
-    } else {
-      res.status(400).json({ message: "No images provided" });
-    }
+    await Images.create({ image: imageName });
+    res.json({ status: "ok" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.json({ status: error });
   }
 });
-
 
 const deleteImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -25,7 +22,7 @@ const deleteImages = asyncHandler(async (req, res) => {
 
     product.images = product.images.filter(img => img._id.toString() !== req.body.imageId);
     await product.save();
-    
+
     res.json({ message: "Image deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });

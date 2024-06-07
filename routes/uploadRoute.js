@@ -5,11 +5,10 @@ const { uploadPhoto, productImgResize } = require("../middlewares/uploadImage");
 const router = express.Router();
 
 router.post(
-  "/", // This is the endpoint path
+  "/create", // This is the endpoint path
   authMiddleware,
   isAdmin,
-  uploadPhoto.array("images", 10), // This middleware handles file uploads
-  // This middleware resizes uploaded images
+  uploadPhoto.single("image"), // This middleware handles single file upload
   uploadImages // This is the handler function for uploading images
 );
 
