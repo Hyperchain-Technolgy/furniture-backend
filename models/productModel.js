@@ -2,12 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const productSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Product title is required'],
-    trim: true,
-    maxlength: [100, 'Title cannot exceed 100 characters']
-  },
+  title: { type: String, required: [true, 'Product title is required'] },
   slug: {
     type: String,
     required: true,
@@ -15,36 +10,14 @@ const productSchema = new mongoose.Schema({
     lowercase: true,
     set: value => value.replace(/\s+/g, '-').toLowerCase()
   },
-  description: {
-    type: String,
-    required: true,
-    // maxlength: [500, 'Description cannot exceed 500 characters']
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: [0, 'Price must be a positive number']
-  },
-  category: {
-    type: String,
-    required: true
-  },
-  images: [{
-    image: String,
-    // url: {
-    //   type: String,
-    //   validate: [validator.isURL, 'Please use a valid URL'],
-    //   images: [{ type: String }]
-    // }
-  }],
-  color: {
-    type: [String],
-    // required: true
-  },
-  material: {
-    type: String,
-    // required: true
-  },
+  description: { type: String, required: true, },
+  price: { type: Number, required: true },
+  category: { type: String, required: true },
+  images: { type: [String], required: true },
+  color: { type: String, required: true },
+  material: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  stock: { type: Boolean, default: function () { return this.quantity > 0; } },
   ratings: [
     {
       star: {
@@ -60,17 +33,8 @@ const productSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  quantity: {
-    type: Number,
-    required: true,
-    min: [0, 'Quantity cannot be negative']
-  },
-  stock: {
-    type: Boolean,
-    default: function () {
-      return this.quantity > 0;
-    }
-  }
-}, { timestamps: true });
+});
 
-module.exports = mongoose.model("Product", productSchema);
+const productModel = mongoose.models.Product || mongoose.model("product", productSchema);
+
+module.exports = productModel;

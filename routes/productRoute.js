@@ -13,9 +13,9 @@ const { isAdmin, authMiddleware } = require("../middlewares/authMiddleware");
 const { uploadPhoto } = require('../middlewares/uploadImage');
 const router = express.Router();
 
-router.post('/create', uploadPhoto.array('images', 10), createProduct);
+router.post('/create', authMiddleware, isAdmin, uploadPhoto, createProduct);
 
-router.put('/update/:id', uploadPhoto.array('images', 10), updateProduct);
+router.put('/update/:id', uploadPhoto, updateProduct);
 
 router.get("/:id", getaProduct);
 router.put("/wishlist", authMiddleware, addToWishlist);

@@ -33,7 +33,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 });
 
 // Middleware to check if the user is an admin
-const isAdmin = asyncHandler(async(req, res, next) => {
+const isAdmin = asyncHandler(async (req, res, next) => {
     const { role } = req.user; // Assuming the role is stored in the user object
     if (role !== "admin") {
         throw new Error("You are not an admin");

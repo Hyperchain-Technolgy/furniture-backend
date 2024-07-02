@@ -1,34 +1,39 @@
-const Product = require("../models/productModel");
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 const validateMongoDbId = require("../utils/validateMongoDbId");
-const upload = require("../middlewares/uploadImage");
+const uploadPhoto = require("../middlewares/uploadImage");
+const productModel = require("../models/productModel");
 
-const createProduct = asyncHandler(async (req, res) => {
+const createProduct = async (req, res) => {
+  let image_filenames = req.files.map(file => file.filename);
+
+  const product = new productModel({
+    title: req.body.title,
+    slug: slugify(req.body.title),
+    description: req.body.description,
+    price: req.body.price,
+    category: req.body.category,
+    images: image_filenames,
+    color: req.body.color,
+    material: req.body.material,
+    quantity: req.body.quantity,
+  });
+
   try {
-    if (!req.body.title || !req.body.description || !req.body.price || !req.body.category || !req.body.quantity) {
-      return res.status(400).json({
-        status: 'fail',
-        message: 'Incomplete product information.'
-      });
-    }
-
-    if (req.body.title) {
-      req.body.slug = slugify(req.body.title);
-    }
-
-    // Handle image uploads and store filenames in req.body
-    if (req.files) {
-      req.body.images = req.files.map((file) => ({ image: file.filename }));
-    }
-
-    const newProduct = await Product.create(req.body);
-    res.status(201).json(newProduct);
+    await product.save();
+    res.json({
+      status: 'success',
+      message: 'Product created successfully',
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log(error);
+    res.status(500).json({
+      status: 'fail',
+      message: 'Product creation failed',
+    });
   }
-});
+};
 
 const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -37,7 +42,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   try {
     if (req.body.title) {
       const newSlug = slugify(req.body.title);
-      const existingProduct = await Product.findOne({ slug: newSlug });
+      const existingProduct = await productModel.findOne({ slug: newSlug });
       if (existingProduct && existingProduct._id.toString() !== id) {
         return res.status(400).json({ message: "Slug already exists" });
       }
@@ -57,7 +62,7 @@ const updateProduct = asyncHandler(async (req, res) => {
       req.body.images = req.files.map((file) => ({ image: file.filename }));
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
+    const updatedProduct = await productModel.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     res.json(updatedProduct);
@@ -71,7 +76,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
   validateMongoDbId(id);
 
   try {
-    const deletedProduct = await Product.findOneAndDelete({ _id: id });
+    const deletedProduct = await productModel.findOneAndDelete({ _id: id });
     if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -85,7 +90,7 @@ const getaProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const findProduct = await Product.findById(id);
+    const findProduct = await productModel.findById(id);
     res.json(findProduct);
   } catch (error) {
     throw new Error(error);
@@ -101,7 +106,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    let query = Product.find(JSON.parse(queryStr));
+    let query = productModel.find(JSON.parse(queryStr));
 
     // Sorting
 
@@ -128,7 +133,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
     const skip = (page - 1) * limit;
     query = query.skip(skip).limit(limit);
     if (req.query.page) {
-      const productCount = await Product.countDocuments();
+      const productCount = await productModel.countDocuments();
       if (skip >= productCount) throw new Error("This Page does not exists");
     }
     const product = await query;
@@ -201,12 +206,12 @@ const rating = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   const { star, prodId, comment } = req.body;
   try {
-    const product = await Product.findById(prodId);
+    const product = await productModel.findById(prodId);
     let alreadyRated = product.ratings.find(
       (userId) => userId.postedby.toString() === _id.toString()
     );
     if (alreadyRated) {
-      const updateRating = await Product.updateOne(
+      const updateRating = await productModel.updateOne(
         {
           ratings: { $elemMatch: alreadyRated },
         },
@@ -218,7 +223,7 @@ const rating = asyncHandler(async (req, res) => {
         }
       );
     } else {
-      const rateProduct = await Product.findByIdAndUpdate(
+      const rateProduct = await productModel.findByIdAndUpdate(
         prodId,
         {
           $push: {
@@ -234,13 +239,13 @@ const rating = asyncHandler(async (req, res) => {
         }
       );
     }
-    const getallratings = await Product.findById(prodId);
+    const getallratings = await productModel.findById(prodId);
     let totalRating = getallratings.ratings.length;
     let ratingsum = getallratings.ratings
       .map((item) => item.star)
       .reduce((prev, curr) => prev + curr, 0);
     let actualRating = Math.round(ratingsum / totalRating);
-    let finalproduct = await Product.findByIdAndUpdate(
+    let finalproduct = await productModel.findByIdAndUpdate(
       prodId,
       {
         totalrating: actualRating,
